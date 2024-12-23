@@ -16,6 +16,8 @@ public class CarService {
 
     private final CarRepository carRepository;
 
+    private final GarageService garageService;
+
     public List<Car> getAllCars() {
         return carRepository.findAll();
     }
@@ -29,7 +31,7 @@ public class CarService {
         car.setModel(carDTO.getModel());
         car.setProductionYear(carDTO.getProductionYear());
         car.setLicensePlate(carDTO.getLicensePlate());
-        car.setGarages(carDTO.getGarages());
+        carDTO.getGarageIds().forEach(garageId -> car.getGarages().add(garageService.getGarageById(garageId).get()));
         return carRepository.save(car);
     }
 

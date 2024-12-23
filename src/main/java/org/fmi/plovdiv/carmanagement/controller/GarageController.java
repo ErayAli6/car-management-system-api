@@ -2,6 +2,7 @@ package org.fmi.plovdiv.carmanagement.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.fmi.plovdiv.carmanagement.dto.CreateGarageDTO;
+import org.fmi.plovdiv.carmanagement.dto.GarageDailyAvailabilityReportDTO;
 import org.fmi.plovdiv.carmanagement.dto.ResponseGarageDTO;
 import org.fmi.plovdiv.carmanagement.dto.UpdateGarageDTO;
 import org.fmi.plovdiv.carmanagement.mapper.GarageMapper;
@@ -10,6 +11,7 @@ import org.fmi.plovdiv.carmanagement.service.GarageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,9 +43,9 @@ public class GarageController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGarageById(@PathVariable Long id) {
+    public ResponseEntity<Boolean> deleteGarageById(@PathVariable Long id) {
         garageService.deleteGarage(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(true);
     }
 
     @GetMapping
@@ -57,5 +59,13 @@ public class GarageController {
         Garage garage = garageMapper.toEntity(garageDTO);
         Garage createdGarage = garageService.saveGarage(garage);
         return ResponseEntity.ok(garageMapper.toDto(createdGarage));
+    }
+
+    @GetMapping("/dailyAvailabilityReport")
+    public ResponseEntity<List<GarageDailyAvailabilityReportDTO>> getDailyAvailabilityReport(@RequestParam Long garageId,
+                                                                                             @RequestParam LocalDate startDate,
+                                                                                             @RequestParam LocalDate endDate) {
+//        List<Garage> garages = garageService.getDailyAvailabilityReport(date);
+        return ResponseEntity.ok(List.of());
     }
 }

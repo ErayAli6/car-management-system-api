@@ -42,9 +42,9 @@ public class MaintenanceController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMaintenance(@PathVariable Long id) {
+    public ResponseEntity<Boolean> deleteMaintenance(@PathVariable Long id) {
         maintenanceService.deleteMaintenance(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(true);
     }
 
     @GetMapping
@@ -59,8 +59,7 @@ public class MaintenanceController {
 
     @PostMapping
     public ResponseEntity<ResponseMaintenanceDTO> createMaintenance(@RequestBody CreateMaintenanceDTO maintenanceDTO) {
-        Maintenance maintenance = maintenanceMapper.toEntity(maintenanceDTO);
-        Maintenance createdMaintenance = maintenanceService.saveMaintenance(maintenance);
+        Maintenance createdMaintenance = maintenanceService.saveMaintenance(maintenanceDTO);
         return ResponseEntity.ok(maintenanceMapper.toDto(createdMaintenance));
     }
 
