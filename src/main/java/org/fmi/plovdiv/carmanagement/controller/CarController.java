@@ -32,10 +32,12 @@ public class CarController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseCarDTO> updateCar(@PathVariable Long id, @RequestBody UpdateCarDTO carDTO) {
-        Car car = carMapper.toEntity(carDTO);
-        car.setId(id);
-        Car updatedCar = carService.saveCar(car);
-        return ResponseEntity.ok(carMapper.toDto(updatedCar));
+        Optional<Car> carById = carService.getCarById(id);
+        if (carById.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        ResponseCarDTO responseCarDTO = carMapper.toDto(carService.updateCar(carById.get(), carDTO));
+        return ResponseEntity.ok(responseCarDTO);
     }
 
     @DeleteMapping("/{id}")

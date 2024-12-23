@@ -2,10 +2,11 @@ package org.fmi.plovdiv.carmanagement.mapper;
 
 import org.fmi.plovdiv.carmanagement.dto.CreateCarDTO;
 import org.fmi.plovdiv.carmanagement.dto.ResponseCarDTO;
+import org.fmi.plovdiv.carmanagement.dto.ResponseGarageDTO;
 import org.fmi.plovdiv.carmanagement.dto.UpdateCarDTO;
 import org.fmi.plovdiv.carmanagement.model.Car;
+import org.fmi.plovdiv.carmanagement.model.Garage;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface CarMapper {
@@ -14,6 +15,7 @@ public interface CarMapper {
 
     Car toEntity(UpdateCarDTO dto);
 
-    @Mapping(target = "garageIds", source = "garages.id")
-    ResponseCarDTO toDto(Car entity);
+    ResponseCarDTO toDto(Car car);
+
+    ResponseGarageDTO toGarageDto(Garage garage);
 }

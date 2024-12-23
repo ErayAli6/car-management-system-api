@@ -32,16 +32,18 @@ public class GarageController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseGarageDTO> updateGarage(@PathVariable Long id, @RequestBody UpdateGarageDTO garageDTO) {
-        Garage garage = garageMapper.toEntity(garageDTO);
-        garage.setId(id);
-        Garage updatedGarage = garageService.saveGarage(garage);
-        return ResponseEntity.ok(garageMapper.toDto(updatedGarage));
+        Optional<Garage> garageById = garageService.getGarageById(id);
+        if (garageById.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Garage garage = garageService.updateGarage(garageById.get(), garageDTO);
+        return ResponseEntity.ok(garageMapper.toDto(garage));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> deleteGarageById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteGarageById(@PathVariable Long id) {
         garageService.deleteGarage(id);
-        return ResponseEntity.ok(true);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

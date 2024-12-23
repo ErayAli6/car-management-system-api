@@ -1,6 +1,7 @@
 package org.fmi.plovdiv.carmanagement.service;
 
 import lombok.RequiredArgsConstructor;
+import org.fmi.plovdiv.carmanagement.dto.UpdateGarageDTO;
 import org.fmi.plovdiv.carmanagement.model.Garage;
 import org.fmi.plovdiv.carmanagement.repository.GarageRepository;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,14 @@ public class GarageService {
 
     public List<Garage> getAllGarages() {
         return garageRepository.findAll();
+    }
+
+    public Garage updateGarage(Garage garage, UpdateGarageDTO garageDTO) {
+        garage.setName(garageDTO.getName());
+        garage.setCity(garageDTO.getCity());
+        garage.setCapacity(garageDTO.getCapacity());
+        garage.setLocation(garageDTO.getLocation());
+        return garageRepository.save(garage);
     }
 
     public Optional<Garage> getGarageById(Long id) {

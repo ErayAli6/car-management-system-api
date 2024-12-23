@@ -33,16 +33,18 @@ public class MaintenanceController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseMaintenanceDTO> updateMaintenance(@PathVariable Long id, @RequestBody UpdateMaintenanceDTO maintenanceDTO) {
-        Maintenance maintenance = maintenanceMapper.toEntity(maintenanceDTO);
-        maintenance.setId(id);
-        Maintenance updatedMaintenance = maintenanceService.saveMaintenance(maintenance);
-        return ResponseEntity.ok(maintenanceMapper.toDto(updatedMaintenance));
+        Optional<Maintenance> maintenanceById = maintenanceService.getMaintenanceById(id);
+        if(maintenanceById.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Maintenance maintenance = maintenanceService.updateMaintenance(maintenanceById.get(), maintenanceDTO);
+        return ResponseEntity.ok(maintenanceMapper.toDto(maintenance));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> deleteMaintenance(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMaintenance(@PathVariable Long id) {
         maintenanceService.deleteMaintenance(id);
-        return ResponseEntity.ok(true);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

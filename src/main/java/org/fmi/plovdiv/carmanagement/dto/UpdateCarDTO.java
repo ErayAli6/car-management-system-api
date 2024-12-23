@@ -1,6 +1,7 @@
 package org.fmi.plovdiv.carmanagement.dto;
 
 import lombok.Data;
+import org.fmi.plovdiv.carmanagement.model.Garage;
 
 import java.util.List;
 
@@ -15,5 +16,5 @@ public class UpdateCarDTO {
 
     private String licensePlate;
 
-    private List<Long> garageIds;
+    private List<Garage> garages;
 }
