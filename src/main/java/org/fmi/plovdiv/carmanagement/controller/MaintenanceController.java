@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -68,9 +69,9 @@ public class MaintenanceController {
     @GetMapping("/monthlyRequestsReport")
     public ResponseEntity<List<MonthlyRequestsReportDTO>> monthlyRequestsReport(
             @RequestParam Long garageId,
-            @RequestParam String startMonth,
-            @RequestParam String endMonth) {
-        // Implement the logic for generating the report
-        return ResponseEntity.ok(List.of());
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth startMonth,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth endMonth) {
+        List<MonthlyRequestsReportDTO> report = maintenanceService.getMonthlyRequestsReport(garageId, startMonth, endMonth);
+        return ResponseEntity.ok(report);
     }
 }
