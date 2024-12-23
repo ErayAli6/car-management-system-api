@@ -8,6 +8,7 @@ import org.fmi.plovdiv.carmanagement.dto.UpdateGarageDTO;
 import org.fmi.plovdiv.carmanagement.mapper.GarageMapper;
 import org.fmi.plovdiv.carmanagement.model.Garage;
 import org.fmi.plovdiv.carmanagement.service.GarageService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,9 +64,9 @@ public class GarageController {
 
     @GetMapping("/dailyAvailabilityReport")
     public ResponseEntity<List<GarageDailyAvailabilityReportDTO>> getDailyAvailabilityReport(@RequestParam Long garageId,
-                                                                                             @RequestParam LocalDate startDate,
-                                                                                             @RequestParam LocalDate endDate) {
-//        List<Garage> garages = garageService.getDailyAvailabilityReport(date);
-        return ResponseEntity.ok(List.of());
+                                                                                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                                                                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        List<GarageDailyAvailabilityReportDTO> report = garageService.getDailyAvailabilityReport(garageId, startDate, endDate);
+        return ResponseEntity.ok(report);
     }
 }
