@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.fmi.plovdiv.carmanagement.dto.UpdateGarageDTO;
 import org.fmi.plovdiv.carmanagement.model.Garage;
 import org.fmi.plovdiv.carmanagement.repository.GarageRepository;
+import org.fmi.plovdiv.carmanagement.repository.GarageSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,8 +17,9 @@ public class GarageService {
 
     private final GarageRepository garageRepository;
 
-    public List<Garage> getAllGarages() {
-        return garageRepository.findAll();
+    public List<Garage> getAllGarages(String city) {
+        Specification<Garage> spec = Specification.where(GarageSpecification.hasCity(city));
+        return garageRepository.findAll(spec);
     }
 
     public Garage updateGarage(Garage garage, UpdateGarageDTO garageDTO) {

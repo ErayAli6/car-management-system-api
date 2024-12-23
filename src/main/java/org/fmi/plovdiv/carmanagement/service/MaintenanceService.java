@@ -8,6 +8,8 @@ import org.fmi.plovdiv.carmanagement.model.Car;
 import org.fmi.plovdiv.carmanagement.model.Garage;
 import org.fmi.plovdiv.carmanagement.model.Maintenance;
 import org.fmi.plovdiv.carmanagement.repository.MaintenanceRepository;
+import org.fmi.plovdiv.carmanagement.repository.MaintenanceSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,8 +26,12 @@ public class MaintenanceService {
 
     private final GarageService garageService;
 
-    public List<Maintenance> getAllMaintenances() {
-        return maintenanceRepository.findAll();
+    public List<Maintenance> getAllMaintenances(Long carId, Long garageId, LocalDate startDate, LocalDate endDate) {
+        Specification<Maintenance> spec = Specification.where(MaintenanceSpecification.hasCarId(carId))
+                .and(MaintenanceSpecification.hasGarageId(garageId))
+                .and(MaintenanceSpecification.scheduledBetween(startDate, endDate));
+
+        return maintenanceRepository.findAll(spec);
     }
 
     public Maintenance updateMaintenance(Maintenance maintenance, UpdateMaintenanceDTO maintenanceDTO) {

@@ -50,7 +50,7 @@ public class GarageController {
 
     @GetMapping
     public ResponseEntity<List<ResponseGarageDTO>> getAllGarages(@RequestParam(required = false) String city) {
-        List<Garage> garages = garageService.getAllGarages();
+        List<Garage> garages = garageService.getAllGarages(city);
         return ResponseEntity.ok(garages.stream().map(garageMapper::toDto).collect(Collectors.toList()));
     }
 

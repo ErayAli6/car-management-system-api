@@ -3,6 +3,7 @@ package org.fmi.plovdiv.carmanagement.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -28,5 +29,5 @@ public class Car {
             joinColumns = @JoinColumn(name = "car_id"),
             inverseJoinColumns = @JoinColumn(name = "garage_id")
     )
-    private List<Garage> garages;
+    private List<Garage> garages = new ArrayList<>();
 }

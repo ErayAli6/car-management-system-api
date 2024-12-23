@@ -1,12 +1,15 @@
 package org.fmi.plovdiv.carmanagement.service;
 
 import lombok.RequiredArgsConstructor;
-import org.fmi.plovdiv.carmanagement.dto.ResponseCarDTO;
 import org.fmi.plovdiv.carmanagement.dto.UpdateCarDTO;
 import org.fmi.plovdiv.carmanagement.model.Car;
+import org.fmi.plovdiv.carmanagement.model.Garage;
 import org.fmi.plovdiv.carmanagement.repository.CarRepository;
+import org.fmi.plovdiv.carmanagement.repository.CarSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,8 +21,11 @@ public class CarService {
 
     private final GarageService garageService;
 
-    public List<Car> getAllCars() {
-        return carRepository.findAll();
+    public List<Car> getAllCars(String carMake, Long garageId, Integer fromYear, Integer toYear) {
+        Specification<Car> spec = Specification.where(CarSpecification.hasMake(carMake))
+                .and(CarSpecification.belongsToGarage(garageId))
+                .and(CarSpecification.productionYearBetween(fromYear, toYear));
+        return carRepository.findAll(spec);
     }
 
     public Optional<Car> getCarById(Long id) {
@@ -31,11 +37,14 @@ public class CarService {
         car.setModel(carDTO.getModel());
         car.setProductionYear(carDTO.getProductionYear());
         car.setLicensePlate(carDTO.getLicensePlate());
-        carDTO.getGarageIds().forEach(garageId -> car.getGarages().add(garageService.getGarageById(garageId).get()));
+        List<Garage> newGarages = new ArrayList<>();
+        carDTO.getGarageIds().forEach(garageId -> newGarages.add(garageService.getGarageById(garageId).get()));
+        car.setGarages(newGarages);
         return carRepository.save(car);
     }
 
-    public Car saveCar(Car car) {
+    public Car saveCar(Car car, List<Long> garageIds) {
+        garageIds.forEach(garageId -> car.getGarages().add(garageService.getGarageById(garageId).get()));
         return carRepository.save(car);
     }
 

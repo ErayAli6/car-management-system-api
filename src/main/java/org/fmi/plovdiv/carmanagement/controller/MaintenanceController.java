@@ -8,9 +8,11 @@ import org.fmi.plovdiv.carmanagement.dto.UpdateMaintenanceDTO;
 import org.fmi.plovdiv.carmanagement.mapper.MaintenanceMapper;
 import org.fmi.plovdiv.carmanagement.model.Maintenance;
 import org.fmi.plovdiv.carmanagement.service.MaintenanceService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,7 +36,7 @@ public class MaintenanceController {
     @PutMapping("/{id}")
     public ResponseEntity<ResponseMaintenanceDTO> updateMaintenance(@PathVariable Long id, @RequestBody UpdateMaintenanceDTO maintenanceDTO) {
         Optional<Maintenance> maintenanceById = maintenanceService.getMaintenanceById(id);
-        if(maintenanceById.isEmpty()) {
+        if (maintenanceById.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         Maintenance maintenance = maintenanceService.updateMaintenance(maintenanceById.get(), maintenanceDTO);
@@ -51,9 +53,9 @@ public class MaintenanceController {
     public ResponseEntity<List<ResponseMaintenanceDTO>> getAllMaintenances(
             @RequestParam(required = false) Long carId,
             @RequestParam(required = false) Long garageId,
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
-        List<Maintenance> maintenances = maintenanceService.getAllMaintenances();
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        List<Maintenance> maintenances = maintenanceService.getAllMaintenances(carId, garageId, startDate, endDate);
         return ResponseEntity.ok(maintenances.stream().map(maintenanceMapper::toDto).collect(Collectors.toList()));
     }
 

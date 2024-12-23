@@ -52,14 +52,14 @@ public class CarController {
             @RequestParam(required = false) Long garageId,
             @RequestParam(required = false) Integer fromYear,
             @RequestParam(required = false) Integer toYear) {
-        List<Car> cars = carService.getAllCars();
+        List<Car> cars = carService.getAllCars(carMake, garageId, fromYear, toYear);
         return ResponseEntity.ok(cars.stream().map(carMapper::toDto).collect(Collectors.toList()));
     }
 
     @PostMapping
     public ResponseEntity<ResponseCarDTO> createCar(@RequestBody CreateCarDTO carDTO) {
         Car car = carMapper.toEntity(carDTO);
-        Car createdCar = carService.saveCar(car);
+        Car createdCar = carService.saveCar(car, carDTO.getGarageIds());
         return ResponseEntity.ok(carMapper.toDto(createdCar));
     }
 }
