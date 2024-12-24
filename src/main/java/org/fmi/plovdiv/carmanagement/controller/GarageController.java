@@ -1,5 +1,6 @@
 package org.fmi.plovdiv.carmanagement.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.fmi.plovdiv.carmanagement.dto.CreateGarageDTO;
 import org.fmi.plovdiv.carmanagement.dto.GarageDailyAvailabilityReportDTO;
@@ -28,18 +29,14 @@ public class GarageController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseGarageDTO> getGarageById(@PathVariable Long id) {
-        Optional<Garage> garage = garageService.getGarageById(id);
-        return garage.map(value -> ResponseEntity.ok(garageMapper.toDto(value)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        Garage garage = garageService.getGarageById(id);
+        return ResponseEntity.ok(garageMapper.toDto(garage));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseGarageDTO> updateGarage(@PathVariable Long id, @RequestBody UpdateGarageDTO garageDTO) {
-        Optional<Garage> garageById = garageService.getGarageById(id);
-        if (garageById.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        Garage garage = garageService.updateGarage(garageById.get(), garageDTO);
+    public ResponseEntity<ResponseGarageDTO> updateGarage(@PathVariable Long id, @Valid @RequestBody UpdateGarageDTO garageDTO) {
+        Garage garageById = garageService.getGarageById(id);
+        Garage garage = garageService.updateGarage(garageById, garageDTO);
         return ResponseEntity.ok(garageMapper.toDto(garage));
     }
 
@@ -56,7 +53,7 @@ public class GarageController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseGarageDTO> createGarage(@RequestBody CreateGarageDTO garageDTO) {
+    public ResponseEntity<ResponseGarageDTO> createGarage(@Valid @RequestBody CreateGarageDTO garageDTO) {
         Garage garage = garageMapper.toEntity(garageDTO);
         Garage createdGarage = garageService.saveGarage(garage);
         return ResponseEntity.ok(garageMapper.toDto(createdGarage));

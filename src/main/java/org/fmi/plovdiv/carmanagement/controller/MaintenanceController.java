@@ -1,5 +1,6 @@
 package org.fmi.plovdiv.carmanagement.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.fmi.plovdiv.carmanagement.dto.CreateMaintenanceDTO;
 import org.fmi.plovdiv.carmanagement.dto.MonthlyRequestsReportDTO;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -29,18 +29,14 @@ public class MaintenanceController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseMaintenanceDTO> getMaintenanceById(@PathVariable Long id) {
-        Optional<Maintenance> maintenance = maintenanceService.getMaintenanceById(id);
-        return maintenance.map(value -> ResponseEntity.ok(maintenanceMapper.toDto(value)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        Maintenance maintenance = maintenanceService.getMaintenanceById(id);
+        return ResponseEntity.ok(maintenanceMapper.toDto(maintenance));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseMaintenanceDTO> updateMaintenance(@PathVariable Long id, @RequestBody UpdateMaintenanceDTO maintenanceDTO) {
-        Optional<Maintenance> maintenanceById = maintenanceService.getMaintenanceById(id);
-        if (maintenanceById.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        Maintenance maintenance = maintenanceService.updateMaintenance(maintenanceById.get(), maintenanceDTO);
+    public ResponseEntity<ResponseMaintenanceDTO> updateMaintenance(@PathVariable Long id, @Valid @RequestBody UpdateMaintenanceDTO maintenanceDTO) {
+        Maintenance maintenanceById = maintenanceService.getMaintenanceById(id);
+        Maintenance maintenance = maintenanceService.updateMaintenance(maintenanceById, maintenanceDTO);
         return ResponseEntity.ok(maintenanceMapper.toDto(maintenance));
     }
 
@@ -61,7 +57,7 @@ public class MaintenanceController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseMaintenanceDTO> createMaintenance(@RequestBody CreateMaintenanceDTO maintenanceDTO) {
+    public ResponseEntity<ResponseMaintenanceDTO> createMaintenance(@Valid @RequestBody CreateMaintenanceDTO maintenanceDTO) {
         Maintenance createdMaintenance = maintenanceService.saveMaintenance(maintenanceDTO);
         return ResponseEntity.ok(maintenanceMapper.toDto(createdMaintenance));
     }

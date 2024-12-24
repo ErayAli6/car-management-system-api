@@ -1,5 +1,6 @@
 package org.fmi.plovdiv.carmanagement.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.fmi.plovdiv.carmanagement.dto.CreateCarDTO;
 import org.fmi.plovdiv.carmanagement.dto.ResponseCarDTO;
@@ -11,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -25,18 +25,14 @@ public class CarController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseCarDTO> getCarById(@PathVariable Long id) {
-        Optional<Car> car = carService.getCarById(id);
-        return car.map(value -> ResponseEntity.ok(carMapper.toDto(value)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        Car car = carService.getCarById(id);
+        return ResponseEntity.ok(carMapper.toDto(car));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseCarDTO> updateCar(@PathVariable Long id, @RequestBody UpdateCarDTO carDTO) {
-        Optional<Car> carById = carService.getCarById(id);
-        if (carById.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        ResponseCarDTO responseCarDTO = carMapper.toDto(carService.updateCar(carById.get(), carDTO));
+    public ResponseEntity<ResponseCarDTO> updateCar(@PathVariable Long id, @Valid @RequestBody UpdateCarDTO carDTO) {
+        Car carById = carService.getCarById(id);
+        ResponseCarDTO responseCarDTO = carMapper.toDto(carService.updateCar(carById, carDTO));
         return ResponseEntity.ok(responseCarDTO);
     }
 
@@ -57,7 +53,7 @@ public class CarController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseCarDTO> createCar(@RequestBody CreateCarDTO carDTO) {
+    public ResponseEntity<ResponseCarDTO> createCar(@Valid @RequestBody CreateCarDTO carDTO) {
         Car car = carMapper.toEntity(carDTO);
         Car createdCar = carService.saveCar(car, carDTO.getGarageIds());
         return ResponseEntity.ok(carMapper.toDto(createdCar));
