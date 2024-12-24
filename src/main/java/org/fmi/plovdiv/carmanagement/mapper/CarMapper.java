@@ -13,8 +13,6 @@ public interface CarMapper {
 
     Car toEntity(CreateCarDTO dto);
 
-    Car toEntity(UpdateCarDTO dto);
-
     ResponseCarDTO toDto(Car car);
 
     ResponseGarageDTO toGarageDto(Garage garage);

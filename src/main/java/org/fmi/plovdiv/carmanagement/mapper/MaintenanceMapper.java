@@ -10,10 +10,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface MaintenanceMapper {
 
-    Maintenance toEntity(CreateMaintenanceDTO dto);
-
-    Maintenance toEntity(UpdateMaintenanceDTO dto);
-
     @Mapping(source = "car.id", target = "carId")
     @Mapping(source = "car.make", target = "carName")
     @Mapping(source = "garage.id", target = "garageId")

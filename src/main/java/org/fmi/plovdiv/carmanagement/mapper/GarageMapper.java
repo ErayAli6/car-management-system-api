@@ -11,7 +11,5 @@ public interface GarageMapper {
 
     Garage toEntity(CreateGarageDTO dto);
 
-    Garage toEntity(UpdateGarageDTO dto);
-
     ResponseGarageDTO toDto(Garage entity);
 }
