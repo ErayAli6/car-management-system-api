@@ -35,8 +35,9 @@ public class GarageService {
         return garageRepository.save(garage);
     }
 
-    public Optional<Garage> getGarageById(Long id) {
-        return garageRepository.findById(id);
+    public Garage getGarageById(Long id) {
+        return garageRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Garage not found with id: " + id));
     }
 
     public Garage saveGarage(Garage garage) {

@@ -1,5 +1,6 @@
 package org.fmi.plovdiv.carmanagement.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.fmi.plovdiv.carmanagement.dto.UpdateCarDTO;
 import org.fmi.plovdiv.carmanagement.model.Car;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -28,8 +28,9 @@ public class CarService {
         return carRepository.findAll(spec);
     }
 
-    public Optional<Car> getCarById(Long id) {
-        return carRepository.findById(id);
+    public Car getCarById(Long id) {
+        return carRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
     }
 
     public Car updateCar(Car car, UpdateCarDTO carDTO) {
@@ -38,13 +39,13 @@ public class CarService {
         car.setProductionYear(carDTO.getProductionYear());
         car.setLicensePlate(carDTO.getLicensePlate());
         List<Garage> newGarages = new ArrayList<>();
-        carDTO.getGarageIds().forEach(garageId -> newGarages.add(garageService.getGarageById(garageId).get()));
+        carDTO.getGarageIds().forEach(garageId -> newGarages.add(garageService.getGarageById(garageId)));
         car.setGarages(newGarages);
         return carRepository.save(car);
     }
 
     public Car saveCar(Car car, List<Long> garageIds) {
-        garageIds.forEach(garageId -> car.getGarages().add(garageService.getGarageById(garageId).get()));
+        garageIds.forEach(garageId -> car.getGarages().add(garageService.getGarageById(garageId)));
         return carRepository.save(car);
     }
 

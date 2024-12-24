@@ -17,8 +17,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -34,26 +32,29 @@ public class MaintenanceService {
         Specification<Maintenance> spec = Specification.where(MaintenanceSpecification.hasCarId(carId))
                 .and(MaintenanceSpecification.hasGarageId(garageId))
                 .and(MaintenanceSpecification.scheduledBetween(startDate, endDate));
-
         return maintenanceRepository.findAll(spec);
     }
 
     public Maintenance updateMaintenance(Maintenance maintenance, UpdateMaintenanceDTO maintenanceDTO) {
-        maintenance.setCar(carService.getCarById(maintenanceDTO.getCarId()).get());
+        maintenance.setCar(carService.getCarById(maintenanceDTO.getCarId()));
         maintenance.setServiceType(maintenanceDTO.getServiceType());
         maintenance.setScheduledDate(maintenanceDTO.getScheduledDate());
-        maintenance.setGarage(garageService.getGarageById(maintenanceDTO.getGarageId()).get());
+        maintenance.setGarage(garageService.getGarageById(maintenanceDTO.getGarageId()));
         return maintenanceRepository.save(maintenance);
     }
-    public Optional<Maintenance> getMaintenanceById(Long id) {
-        return maintenanceRepository.findById(id);
+
+    public Maintenance getMaintenanceById(Long id) {
+        return maintenanceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Maintenance not found with id: " + id));
     }
 
     public Maintenance saveMaintenance(CreateMaintenanceDTO maintenanceDTO) {
-        Car car = carService.getCarById(maintenanceDTO.getCarId())
-                .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + maintenanceDTO.getCarId()));
-        Garage garage = garageService.getGarageById(maintenanceDTO.getGarageId())
-                .orElseThrow(() -> new EntityNotFoundException("Garage not found with id: " + maintenanceDTO.getGarageId()));
+        Car car = carService.getCarById(maintenanceDTO.getCarId());
+        Garage garage = garageService.getGarageById(maintenanceDTO.getGarageId());
+        long currentMaintenanceCount = maintenanceRepository.countByGarageId(garage.getId());
+        if (currentMaintenanceCount >= garage.getCapacity()) {
+            throw new IllegalStateException("Garage capacity exceeded for garage id: " + garage.getId());
+        }
         Maintenance maintenance = new Maintenance();
         maintenance.setCar(car);
         maintenance.setGarage(garage);
@@ -67,12 +68,7 @@ public class MaintenanceService {
     }
 
     public List<MonthlyRequestsReportDTO> getMonthlyRequestsReport(Long garageId, YearMonth startMonth, YearMonth endMonth) {
-        Optional<Garage> garageOptional = garageService.getGarageById(garageId);
-        if (garageOptional.isEmpty()) {
-            throw new EntityNotFoundException("Garage not found with id: " + garageId);
-        }
-
-        Garage garage = garageOptional.get();
+        Garage garage = garageService.getGarageById(garageId);
         List<Maintenance> maintenances = garage.getMaintenances()
                 .stream()
                 .filter(m -> {
@@ -80,7 +76,6 @@ public class MaintenanceService {
                     return !maintenanceMonth.isBefore(startMonth) && !maintenanceMonth.isAfter(endMonth);
                 })
                 .toList();
-
         List<MonthlyRequestsReportDTO> report = new ArrayList<>();
         for (YearMonth month = startMonth; !month.isAfter(endMonth); month = month.plusMonths(1)) {
             YearMonth finalMonth = month;
@@ -88,7 +83,6 @@ public class MaintenanceService {
             MonthlyRequestsReportDTO reportDTO = new MonthlyRequestsReportDTO(month, requests);
             report.add(reportDTO);
         }
-
         return report;
     }
 }
