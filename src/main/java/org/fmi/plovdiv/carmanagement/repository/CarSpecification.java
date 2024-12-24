@@ -9,7 +9,7 @@ public class CarSpecification {
 
     public static Specification<Car> hasMake(String make) {
         return (root, query, criteriaBuilder) ->
-                make == null ? criteriaBuilder.conjunction() : criteriaBuilder.equal(criteriaBuilder.lower(root.get("make")), make.toLowerCase());
+                make == null ? criteriaBuilder.conjunction() : criteriaBuilder.like(criteriaBuilder.lower(root.get("make")), "%" + make.toLowerCase() + "%");
     }
 
     public static Specification<Car> belongsToGarage(Long garageId) {
