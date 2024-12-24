@@ -26,6 +26,38 @@ This repository contains the Car Management System API, which provides endpoints
     npm install
     ```
 
+### How to Run the Program
+
+There are two ways to run the application:
+
+#### Option 1: Using Maven Commands
+1. **Run the Maven build**:
+    ```bash
+    ./mvnw clean install
+    ```
+   This will compile the code and package the application into a `.jar` file.
+
+2. **Run the packaged application**:
+   Navigate to the `target` folder:
+    ```bash
+    cd target
+    ```
+   Run the JAR file:
+    ```bash
+    java -jar *.jar
+    ```
+   The application should now be running and accessible.
+
+---
+
+#### Option 2: Using IntelliJ IDEA with Maven Delegation
+1. Open IntelliJ IDEA.
+2. Go to `File` > `Settings` > `Build, Execution, Deployment` > `Build Tools` > `Maven` > `Runner`.
+3. Enable the option **"Delegate IDE build/run actions to Maven"**.
+4. Run the application directly using the IntelliJ IDEA run configuration.
+
+The application should now be running and accessible.
+
 ## API Endpoints
 
 Here are some of the key endpoints provided by the API:
