@@ -1,6 +1,9 @@
 package org.fmi.plovdiv.carmanagement.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -15,12 +18,17 @@ public class Car {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotEmpty(message = "Make is required")
     private String make;
 
+    @NotEmpty(message = "Model is required")
     private String model;
 
+    @Positive(message = "Production year must be positive")
     private int productionYear;
 
+    @NotEmpty(message = "License plate is required")
+    @Size(max = 10, message = "License plate cannot exceed 10 characters")
     private String licensePlate;
 
     @ManyToMany

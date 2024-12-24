@@ -1,6 +1,8 @@
 package org.fmi.plovdiv.carmanagement.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -14,8 +16,10 @@ public class Maintenance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotEmpty(message = "Service type is required")
     private String serviceType;
 
+    @NotNull(message = "Scheduled date is required")
     private LocalDate scheduledDate;
 
     @ManyToOne
