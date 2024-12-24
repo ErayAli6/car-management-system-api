@@ -9,6 +9,6 @@ public class GarageSpecification {
 
     public static Specification<Garage> hasCity(String city) {
         return (root, query, criteriaBuilder) ->
-                city == null ? criteriaBuilder.conjunction() : criteriaBuilder.equal(criteriaBuilder.lower(root.get("city")), city.toLowerCase());
+                city == null ? criteriaBuilder.conjunction() : criteriaBuilder.like(criteriaBuilder.lower(root.get("city")), "%" + city.toLowerCase() + "%");
     }
 }
