@@ -1,3 +1,4 @@
+// MaintenanceServiceTest.java
 package org.fmi.plovdiv.carmanagement.service;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -84,7 +85,9 @@ class MaintenanceServiceTest {
         when(maintenanceRepository.findAll(any(Specification.class))).thenReturn(expectedMaintenances);
 
         // When
-        List<Maintenance> result = maintenanceService.getAllMaintenances(1L, 1L, LocalDate.now(), LocalDate.now());
+        List<Maintenance> result = maintenanceService.getAllMaintenances(
+                1L, 1L, LocalDate.now(), LocalDate.now()
+        );
 
         // Then
         assertNotNull(result);
@@ -111,7 +114,7 @@ class MaintenanceServiceTest {
         // Given
         when(maintenanceRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // When & Then
+        // When/Then
         assertThrows(EntityNotFoundException.class, () -> maintenanceService.getMaintenanceById(1L));
         verify(maintenanceRepository).findById(1L);
     }
@@ -121,7 +124,10 @@ class MaintenanceServiceTest {
         // Given
         when(carService.getCarById(1L)).thenReturn(testCar);
         when(garageService.getGarageById(1L)).thenReturn(testGarage);
-        when(maintenanceRepository.countByGarageId(1L)).thenReturn(0L);
+        when(maintenanceRepository.countByGarageIdAndScheduledDate(
+                1L,
+                createMaintenanceDTO.getScheduledDate()
+        )).thenReturn(0L);
         when(maintenanceRepository.save(any(Maintenance.class))).thenReturn(testMaintenance);
 
         // When
@@ -138,9 +144,12 @@ class MaintenanceServiceTest {
         // Given
         when(carService.getCarById(1L)).thenReturn(testCar);
         when(garageService.getGarageById(1L)).thenReturn(testGarage);
-        when(maintenanceRepository.countByGarageId(1L)).thenReturn(5L);
+        when(maintenanceRepository.countByGarageIdAndScheduledDate(
+                1L,
+                createMaintenanceDTO.getScheduledDate()
+        )).thenReturn(5L);
 
-        // When & Then
+        // When/Then
         assertThrows(IllegalStateException.class, () -> maintenanceService.saveMaintenance(createMaintenanceDTO));
         verify(maintenanceRepository, never()).save(any(Maintenance.class));
     }
@@ -178,11 +187,9 @@ class MaintenanceServiceTest {
         // Given
         YearMonth startMonth = YearMonth.now().minusMonths(1);
         YearMonth endMonth = YearMonth.now();
-
         List<Maintenance> maintenances = new ArrayList<>();
         maintenances.add(testMaintenance);
         testGarage.setMaintenances(maintenances);
-
         when(garageService.getGarageById(1L)).thenReturn(testGarage);
 
         // When

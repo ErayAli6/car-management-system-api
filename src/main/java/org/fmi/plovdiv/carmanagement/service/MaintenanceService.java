@@ -51,7 +51,7 @@ public class MaintenanceService {
     public Maintenance saveMaintenance(CreateMaintenanceDTO maintenanceDTO) {
         Car car = carService.getCarById(maintenanceDTO.getCarId());
         Garage garage = garageService.getGarageById(maintenanceDTO.getGarageId());
-        validateGarageCapacity(garage);
+        validateGarageCapacity(garage, maintenanceDTO.getScheduledDate());
         return createAndSaveMaintenance(maintenanceDTO, car, garage);
     }
 
@@ -65,19 +65,14 @@ public class MaintenanceService {
         return generateMonthlyReports(filteredMaintenances, startMonth, endMonth);
     }
 
-    private void validateGarageCapacity(Garage garage) {
-        long currentMaintenanceCount = getCurrentMaintenanceCount(garage.getId());
-        if (isGarageCapacityExceeded(garage, currentMaintenanceCount)) {
-            throw new IllegalStateException("Garage capacity exceeded for garage id: " + garage.getId());
+    private void validateGarageCapacity(Garage garage, LocalDate scheduledDate) {
+        long currentMaintenanceCountForDate = maintenanceRepository
+                .countByGarageIdAndScheduledDate(garage.getId(), scheduledDate);
+        if (currentMaintenanceCountForDate >= garage.getCapacity()) {
+            throw new IllegalStateException(
+                    "Garage capacity exceeded for garage id: " + garage.getId() + " on date: " + scheduledDate
+            );
         }
-    }
-
-    private long getCurrentMaintenanceCount(Long garageId) {
-        return maintenanceRepository.countByGarageId(garageId);
-    }
-
-    private boolean isGarageCapacityExceeded(Garage garage, long currentMaintenanceCount) {
-        return currentMaintenanceCount >= garage.getCapacity();
     }
 
     private Maintenance createAndSaveMaintenance(CreateMaintenanceDTO dto, Car car, Garage garage) {
@@ -105,17 +100,12 @@ public class MaintenanceService {
         return !maintenanceMonth.isBefore(startMonth) && !maintenanceMonth.isAfter(endMonth);
     }
 
-    private List<MonthlyRequestsReportDTO> generateMonthlyReports(
-            List<Maintenance> maintenances,
-            YearMonth startMonth,
-            YearMonth endMonth) {
+    private List<MonthlyRequestsReportDTO> generateMonthlyReports(List<Maintenance> maintenances, YearMonth startMonth, YearMonth endMonth) {
         List<MonthlyRequestsReportDTO> report = new ArrayList<>();
-
         for (YearMonth month = startMonth; !month.isAfter(endMonth); month = month.plusMonths(1)) {
             MonthlyRequestsReportDTO monthlyReport = createMonthlyReport(maintenances, month);
             report.add(monthlyReport);
         }
-
         return report;
     }
 
