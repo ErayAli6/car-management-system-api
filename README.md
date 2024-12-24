@@ -29,7 +29,7 @@ There are two ways to run the application:
 #### Option 1: Using Maven Commands
 1. **Run the Maven build**:
     ```bash
-    ./mvnw clean install
+    mvn clean install
     ```
    This will compile the code and package the application into a `.jar` file.
 
