@@ -13,6 +13,7 @@ This repository contains the Car Management System API, which provides endpoints
 
 - [Node.js](https://nodejs.org/)
 - [Java 21](https://www.oracle.com/java/technologies/javase-jdk21-downloads.html)
+- [Maven](https://maven.apache.org/download.cgi)
 
 ### Installation
 
