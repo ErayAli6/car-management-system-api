@@ -12,6 +12,7 @@ This repository contains the Car Management System API, which provides endpoints
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/)
+- [Java 21](https://www.oracle.com/java/technologies/javase-jdk21-downloads.html)
 
 ### Installation
 
@@ -19,11 +20,6 @@ This repository contains the Car Management System API, which provides endpoints
     ```bash
     git clone https://github.com/ErayAli6/car-management-system-api.git
     cd car-management-system-api
-    ```
-
-2. Install dependencies:
-    ```bash
-    npm install
     ```
 
 ### How to Run the Program
@@ -91,12 +87,12 @@ The frontend for this project is located in the `docs/car-management-frontend` f
 
 2. Install dependencies:
     ```bash
-    npm install
+    npm install serve
     ```
 
 3. Run the frontend application:
     ```bash
-    npm start
+    npx serve
     ```
 
 4. The frontend should now be running at `http://localhost:3000`.
