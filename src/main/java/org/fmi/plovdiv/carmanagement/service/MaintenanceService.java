@@ -51,16 +51,8 @@ public class MaintenanceService {
     public Maintenance saveMaintenance(CreateMaintenanceDTO maintenanceDTO) {
         Car car = carService.getCarById(maintenanceDTO.getCarId());
         Garage garage = garageService.getGarageById(maintenanceDTO.getGarageId());
-        long currentMaintenanceCount = maintenanceRepository.countByGarageId(garage.getId());
-        if (currentMaintenanceCount >= garage.getCapacity()) {
-            throw new IllegalStateException("Garage capacity exceeded for garage id: " + garage.getId());
-        }
-        Maintenance maintenance = new Maintenance();
-        maintenance.setCar(car);
-        maintenance.setGarage(garage);
-        maintenance.setServiceType(maintenanceDTO.getServiceType());
-        maintenance.setScheduledDate(maintenanceDTO.getScheduledDate());
-        return maintenanceRepository.save(maintenance);
+        validateGarageCapacity(garage);
+        return createAndSaveMaintenance(maintenanceDTO, car, garage);
     }
 
     public void deleteMaintenance(Long id) {
@@ -69,20 +61,72 @@ public class MaintenanceService {
 
     public List<MonthlyRequestsReportDTO> getMonthlyRequestsReport(Long garageId, YearMonth startMonth, YearMonth endMonth) {
         Garage garage = garageService.getGarageById(garageId);
-        List<Maintenance> maintenances = garage.getMaintenances()
-                .stream()
-                .filter(m -> {
-                    YearMonth maintenanceMonth = YearMonth.from(m.getScheduledDate());
-                    return !maintenanceMonth.isBefore(startMonth) && !maintenanceMonth.isAfter(endMonth);
-                })
-                .toList();
-        List<MonthlyRequestsReportDTO> report = new ArrayList<>();
-        for (YearMonth month = startMonth; !month.isAfter(endMonth); month = month.plusMonths(1)) {
-            YearMonth finalMonth = month;
-            int requests = (int) maintenances.stream().filter(m -> YearMonth.from(m.getScheduledDate()).equals(finalMonth)).count();
-            MonthlyRequestsReportDTO reportDTO = new MonthlyRequestsReportDTO(month, requests);
-            report.add(reportDTO);
+        List<Maintenance> filteredMaintenances = filterMaintenancesByDateRange(garage.getMaintenances(), startMonth, endMonth);
+        return generateMonthlyReports(filteredMaintenances, startMonth, endMonth);
+    }
+
+    private void validateGarageCapacity(Garage garage) {
+        long currentMaintenanceCount = getCurrentMaintenanceCount(garage.getId());
+        if (isGarageCapacityExceeded(garage, currentMaintenanceCount)) {
+            throw new IllegalStateException("Garage capacity exceeded for garage id: " + garage.getId());
         }
+    }
+
+    private long getCurrentMaintenanceCount(Long garageId) {
+        return maintenanceRepository.countByGarageId(garageId);
+    }
+
+    private boolean isGarageCapacityExceeded(Garage garage, long currentMaintenanceCount) {
+        return currentMaintenanceCount >= garage.getCapacity();
+    }
+
+    private Maintenance createAndSaveMaintenance(CreateMaintenanceDTO dto, Car car, Garage garage) {
+        Maintenance maintenance = createMaintenanceFromDTO(dto, car, garage);
+        return maintenanceRepository.save(maintenance);
+    }
+
+    private Maintenance createMaintenanceFromDTO(CreateMaintenanceDTO dto, Car car, Garage garage) {
+        Maintenance maintenance = new Maintenance();
+        maintenance.setCar(car);
+        maintenance.setGarage(garage);
+        maintenance.setServiceType(dto.getServiceType());
+        maintenance.setScheduledDate(dto.getScheduledDate());
+        return maintenance;
+    }
+
+    private List<Maintenance> filterMaintenancesByDateRange(List<Maintenance> maintenances, YearMonth startMonth, YearMonth endMonth) {
+        return maintenances.stream()
+                .filter(maintenance -> isMaintenanceInMonthRange(maintenance, startMonth, endMonth))
+                .toList();
+    }
+
+    private boolean isMaintenanceInMonthRange(Maintenance maintenance, YearMonth startMonth, YearMonth endMonth) {
+        YearMonth maintenanceMonth = YearMonth.from(maintenance.getScheduledDate());
+        return !maintenanceMonth.isBefore(startMonth) && !maintenanceMonth.isAfter(endMonth);
+    }
+
+    private List<MonthlyRequestsReportDTO> generateMonthlyReports(
+            List<Maintenance> maintenances,
+            YearMonth startMonth,
+            YearMonth endMonth) {
+        List<MonthlyRequestsReportDTO> report = new ArrayList<>();
+
+        for (YearMonth month = startMonth; !month.isAfter(endMonth); month = month.plusMonths(1)) {
+            MonthlyRequestsReportDTO monthlyReport = createMonthlyReport(maintenances, month);
+            report.add(monthlyReport);
+        }
+
         return report;
+    }
+
+    private MonthlyRequestsReportDTO createMonthlyReport(List<Maintenance> maintenances, YearMonth month) {
+        int requests = countMaintenanceRequestsForMonth(maintenances, month);
+        return new MonthlyRequestsReportDTO(month, requests);
+    }
+
+    private int countMaintenanceRequestsForMonth(List<Maintenance> maintenances, YearMonth month) {
+        return (int) maintenances.stream()
+                .filter(maintenance -> YearMonth.from(maintenance.getScheduledDate()).equals(month))
+                .count();
     }
 }

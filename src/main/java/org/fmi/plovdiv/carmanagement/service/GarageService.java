@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -49,26 +48,44 @@ public class GarageService {
     }
 
     public List<GarageDailyAvailabilityReportDTO> getDailyAvailabilityReport(Long garageId, LocalDate startDate, LocalDate endDate) {
-        Optional<Garage> garageOptional = garageRepository.findById(garageId);
-        if (garageOptional.isEmpty()) {
-            throw new EntityNotFoundException("Garage not found with id: " + garageId);
-        }
+        Garage garage = getGarageById(garageId);
+        List<Maintenance> filteredMaintenances = filterMaintenancesInDateRange(garage.getMaintenances(), startDate, endDate);
+        return generateDailyReports(garage, filteredMaintenances, startDate, endDate);
+    }
 
-        Garage garage = garageOptional.get();
-        List<Maintenance> maintenances = garage.getMaintenances()
-                .stream()
-                .filter(m -> !m.getScheduledDate().isBefore(startDate) && !m.getScheduledDate().isAfter(endDate))
+    private List<Maintenance> filterMaintenancesInDateRange(List<Maintenance> maintenances, LocalDate startDate, LocalDate endDate) {
+        return maintenances.stream()
+                .filter(maintenance -> isMaintenanceInDateRange(maintenance, startDate, endDate))
                 .toList();
+    }
 
+    private boolean isMaintenanceInDateRange(Maintenance maintenance, LocalDate startDate, LocalDate endDate) {
+        return !maintenance.getScheduledDate().isBefore(startDate) &&
+                !maintenance.getScheduledDate().isAfter(endDate);
+    }
+
+    private List<GarageDailyAvailabilityReportDTO> generateDailyReports(Garage garage, List<Maintenance> maintenances, LocalDate startDate, LocalDate endDate) {
         List<GarageDailyAvailabilityReportDTO> report = new ArrayList<>();
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-            LocalDate finalDate = date;
-            int requests = (int) maintenances.stream().filter(m -> m.getScheduledDate().isEqual(finalDate)).count();
-            int availableCapacity = garage.getCapacity() - requests;
-            GarageDailyAvailabilityReportDTO reportDTO = new GarageDailyAvailabilityReportDTO(date, requests, availableCapacity);
-            report.add(reportDTO);
+            GarageDailyAvailabilityReportDTO dailyReport = createDailyReport(garage, maintenances, date);
+            report.add(dailyReport);
         }
-
         return report;
+    }
+
+    private GarageDailyAvailabilityReportDTO createDailyReport(Garage garage, List<Maintenance> maintenances, LocalDate date) {
+        int requests = countMaintenanceRequestsForDate(maintenances, date);
+        int availableCapacity = calculateAvailableCapacity(garage.getCapacity(), requests);
+        return new GarageDailyAvailabilityReportDTO(date, requests, availableCapacity);
+    }
+
+    private int countMaintenanceRequestsForDate(List<Maintenance> maintenances, LocalDate date) {
+        return (int) maintenances.stream()
+                .filter(maintenance -> maintenance.getScheduledDate().isEqual(date))
+                .count();
+    }
+
+    private int calculateAvailableCapacity(int totalCapacity, int requests) {
+        return totalCapacity - requests;
     }
 }
